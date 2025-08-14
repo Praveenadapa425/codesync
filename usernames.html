@@ -6,8 +6,7 @@
   <title>CodeSync | Update Usernames</title>
   <link rel="icon" type="image/png" href="favicon_codesync.png">
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/aws-amplify@4.3.27/dist/aws-amplify.min.js"></script>
-  <script src="./js/amplify_config.js"></script>
+  <!-- DELETED AWS AMPLIFY SCRIPT TAGS -->
 </head>
 <body class="bg-gray-900 text-white flex items-center justify-center min-h-screen">
   <div class="bg-white/10 backdrop-blur-md p-8 rounded-xl w-full max-w-md space-y-6 text-center shadow-lg">
@@ -33,9 +32,9 @@
       </div>
     </div>
 
-    <div id="status-message" class="hidden text-sm text-center"></div>
+    <div id="status-message" class="text-sm text-center min-h-[1.25rem]"></div>
 
-    <button onclick="updateUsernames()" class="bg-purple-600 hover:bg-purple-700 w-full py-3 rounded-lg font-semibold text-white transition-colors">
+    <button onclick="updateUsernames()" id="save-button" class="bg-purple-600 hover:bg-purple-700 w-full py-3 rounded-lg font-semibold text-white transition-colors">
       💾 Save Changes
     </button>
     
@@ -45,52 +44,82 @@
     </div>
   </div>
 
-  <script>
-    const platformIds = ["leetcode", "codechef", "hackerrank", "gfg"];
+  <!-- START OF NEW FIREBASE SCRIPT -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
+    import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+    import { firebaseConfig } from './js/firebase_config.js';
 
-    window.addEventListener("load", () => {
-      if (!window.aws_amplify) {
-        console.error("Amplify script failed to load.");
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // DOM Elements
+    const leetcodeInput = document.getElementById('leetcode');
+    const codechefInput = document.getElementById('codechef');
+    const hackerrankInput = document.getElementById('hackerrank');
+    const gfgInput = document.getElementById('gfg');
+    const statusMessage = document.getElementById('status-message');
+    const saveButton = document.getElementById('save-button');
+
+    let currentUserId = null; // Store the current user's ID
+
+    // --- Main Entry Point: Check auth state and load data ---
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            currentUserId = user.uid;
+            // User is signed in, fetch their data from Firestore
+            const userDocRef = doc(db, "users", user.uid);
+            try {
+                const docSnap = await getDoc(userDocRef);
+                if (docSnap.exists()) {
+                    const userData = docSnap.data();
+                    // Populate the input fields with data from Firestore
+                    leetcodeInput.value = userData.leetcode_username || '';
+                    codechefInput.value = userData.codechef_username || '';
+                    hackerrankInput.value = userData.hackerrank_username || '';
+                    gfgInput.value = userData.gfg_username || '';
+                } else {
+                    console.log("No profile document found for this user!");
+                }
+            } catch (err) {
+                console.error("Error fetching user document:", err);
+                statusMessage.textContent = "Could not load profile data.";
+                statusMessage.className = 'text-sm text-red-400';
+            }
+        } else {
+            // No user is signed in, redirect to the login page.
+            console.log("User not authenticated, redirecting to index.html");
+            window.location.href = "index.html";
+        }
+    });
+
+    // --- Global Functions for HTML on-click attributes ---
+    
+    // Function to update usernames in Firestore
+    window.updateUsernames = async function() {
+      if (!currentUserId) {
+        alert("Error: User not logged in.");
         return;
       }
 
-      const { Auth } = window.aws_amplify;
-      Auth.configure(window.amplifyConfig);
+      saveButton.disabled = true;
+      statusMessage.textContent = "Saving...";
+      statusMessage.className = 'text-sm text-yellow-400';
 
-      Auth.currentAuthenticatedUser()
-        .then(user => Auth.userAttributes(user))
-        .then(attributes => {
-          const attributeMap = {};
-          attributes.forEach(attr => {
-            attributeMap[attr.Name] = attr.Value;
-          });
-
-          platformIds.forEach(id => {
-            document.getElementById(id).value = attributeMap[`custom:${id}_username`] || '';
-          });
-        })
-        .catch(err => {
-          console.error("User not authenticated, redirecting...", err);
-          window.location.href = "index.html";
-        });
-    });
-
-    async function updateUsernames() {
-      const statusMessage = document.getElementById('status-message');
-      statusMessage.className = 'hidden';
+      const attributesToUpdate = {
+        leetcode_username: leetcodeInput.value.trim(),
+        codechef_username: codechefInput.value.trim(),
+        hackerrank_username: hackerrankInput.value.trim(),
+        gfg_username: gfgInput.value.trim()
+      };
 
       try {
-        const { Auth } = window.aws_amplify;
-        const user = await Auth.currentAuthenticatedUser();
-
-        const attributesToUpdate = {
-          'custom:leetcode_username': document.getElementById('leetcode').value.trim(),
-          'custom:codechef_username': document.getElementById('codechef').value.trim(),
-          'custom:hackerrank_username': document.getElementById('hackerrank').value.trim(),
-          'custom:gfg_username': document.getElementById('gfg').value.trim()
-        };
-
-        await Auth.updateUserAttributes(user, attributesToUpdate);
+        const userDocRef = doc(db, "users", currentUserId);
+        // Use setDoc with { merge: true } to update fields without overwriting the whole document
+        await setDoc(userDocRef, attributesToUpdate, { merge: true });
 
         statusMessage.textContent = "Usernames updated successfully! Redirecting...";
         statusMessage.className = 'text-sm text-green-400';
@@ -103,17 +132,18 @@
         console.error("Error updating attributes:", err);
         statusMessage.textContent = `Update failed: ${err.message}`;
         statusMessage.className = 'text-sm text-red-400';
+        saveButton.disabled = false;
       }
     }
 
-    async function logout() {
+    // Function to log the user out
+    window.logout = async function() {
       try {
-        const { Auth } = window.aws_amplify;
-        await Auth.signOut();
-        localStorage.clear();
-        window.location.href = "index.html";
+        await signOut(auth);
+        // The onAuthStateChanged listener will automatically redirect to index.html
       } catch (err) {
         console.error("Logout failed:", err);
+        alert("Logout failed. Please try again.");
       }
     }
   </script>
