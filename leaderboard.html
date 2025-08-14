@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <title>CodeSync Leaderboard</title>
+   <link rel="icon" type="image/png" href="favicon_codesync.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white font-sans min-h-screen flex flex-col items-center p-6">
+  <div class="flex flex-col md:flex-row justify-between items-center w-full max-w-4xl mb-8">
+    <h1 class="text-4xl font-bold text-center md:text-left">🏆 CodeSync Leaderboard</h1>
+    <a href="https://gowthusaidatta.github.io/CodeSync_test/results.html" class="mt-4 md:mt-0 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition">
+      Go to Home Page
+    </a>
+  </div>
+
+  <div class="w-full max-w-4xl overflow-x-auto shadow-xl rounded-lg border border-gray-700">
+    <table class="w-full text-sm text-left">
+      <thead class="bg-gray-800 text-white uppercase text-xs">
+        <tr>
+          <th class="px-4 py-3">Rank</th>
+          <th class="px-4 py-3">Name</th>
+          <th class="px-4 py-3">LeetCode</th>
+          <th class="px-4 py-3">CodeChef</th>
+          <th class="px-4 py-3">GeeksforGeeks</th>
+          <th class="px-4 py-3 font-bold">Total</th>
+        </tr>
+      </thead>
+      <tbody id="leaderboard-body" class="bg-gray-700 divide-y divide-gray-600">
+        <!-- Initial loading state -->
+        <tr>
+          <td colspan="6" class="text-center py-4">Loading...</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    async function fetchLeaderboard() {
+      const tbody = document.getElementById('leaderboard-body');
+      try {
+        const response = await fetch('https://2wfv8gd24e.execute-api.us-east-1.amazonaws.com/prob/Leaderboard');
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+
+        data.sort((a, b) => b.total - a.total);
+
+        tbody.innerHTML = '';
+
+        if (data.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4">No data available.</td></tr>';
+          return;
+        }
+
+        data.forEach((user, index) => {
+          const rank = index + 1;
+          let medal = '';
+          if (rank === 1) medal = '🥇 ';
+          else if (rank === 2) medal = '🥈 ';
+          else if (rank === 3) medal = '🥉 ';
+
+          const row = `
+            <tr class="hover:bg-gray-600 transition">
+              <td class="px-4 py-3 text-center font-bold">${rank}</td>
+              <td class="px-4 py-3">${medal}${user.name}</td>
+              <td class="px-4 py-3 text-center">${user.leetcode}</td>
+              <td class="px-4 py-3 text-center">${user.codechef}</td>
+              <td class="px-4 py-3 text-center">${user.gfg}</td>
+              <td class="px-4 py-3 text-center font-semibold text-yellow-400">${user.total}</td>
+            </tr>
+          `;
+          tbody.innerHTML += row;
+        });
+
+      } catch (err) {
+        console.error("Error loading leaderboard:", err);
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-red-500">Error loading leaderboard. Please try again later.</td></tr>';
+      }
+    }
+
+    fetchLeaderboard();
+  </script>
+</body>
+</html>

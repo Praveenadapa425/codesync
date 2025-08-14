@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <title>Contact Us - CodeSync</title>
+  <link rel="icon" type="image/png" href="favicon_codesync.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+  <style>
+    /* Using a dark theme similar to the leaderboard */
+    body {
+      background: linear-gradient(to right, #121212, #1e1e1e);
+      font-family: 'Poppins', sans-serif;
+    }
+
+    /* Glassmorphism Container Style */
+    .glass-container {
+      background: rgba(35, 35, 45, 0.6); /* Darker glass effect */
+      backdrop-filter: blur(10px);
+      border-radius: 15px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    }
+
+    /* Styling for form inputs to match the theme */
+    .form-input {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #fff;
+    }
+
+    .form-input::placeholder {
+      color: #ccc;
+    }
+  </style>
+</head>
+<body class="bg-gray-900 text-white min-h-screen flex flex-col items-center justify-center p-6">
+
+  <div class="w-full max-w-2xl text-center">
+    <div class="glass-container p-8 md:p-12">
+      <div class="flex flex-col md:flex-row justify-between items-center mb-6">
+          <h1 class="text-3xl font-bold text-cyan-400">Contact Us - CodeSync</h1>
+          <a href="leaderboard.html" class="mt-4 md:mt-0 bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded transition text-sm">
+            ← Back to Leaderboard
+          </a>
+      </div>
+
+      <form id="contact-form" action="https://api.web3forms.com/submit" method="POST">
+        <!-- DO NOT CHANGE THIS - IT'S REQUIRED FOR THE FORM TO WORK -->
+        <input type="hidden" name="access_key" value="7f003844-62a9-4710-8794-2dba98e0029e">
+
+        <!-- Form Fields -->
+        <div class="mb-4">
+          <input type="text" id="name" name="name" placeholder="Your Name" class="w-full p-3 rounded-lg form-input transition focus:outline-none focus:ring-2 focus:ring-cyan-400" required>
+        </div>
+
+        <div class="mb-4">
+          <input type="email" id="email" name="email" placeholder="Your Email" class="w-full p-3 rounded-lg form-input transition focus:outline-none focus:ring-2 focus:ring-cyan-400" required>
+        </div>
+
+        <div class="mb-6">
+          <textarea id="description" name="description" placeholder="Your message or feedback..." rows="5" class="w-full p-3 rounded-lg form-input transition focus:outline-none focus:ring-2 focus:ring-cyan-400" required></textarea>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" id="submit-button" class="w-full bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-3 px-4 rounded-lg transition">
+          Send Message
+        </button>
+      </form>
+      <!-- Form Submission Status -->
+      <p id="form-status" class="mt-4 text-center text-sm"></p>
+    </div>
+  </div>
+
+  <footer class="text-center py-6 mt-8 text-gray-500 text-sm">
+    <p>© 2024 CodeSync. All rights reserved.</p>
+  </footer>
+
+  <script>
+    const form = document.getElementById('contact-form');
+    const submitButton = document.getElementById('submit-button');
+    const formStatus = document.getElementById('form-status');
+
+    form.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const formData = new FormData(form);
+      
+      // Update UI to show submission is in progress
+      submitButton.disabled = true;
+      submitButton.innerHTML = 'Sending...';
+      formStatus.textContent = '';
+
+      try {
+        const response = await fetch('https://api.web3forms.com/submit', {
+          method: 'POST',
+          body: formData
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          formStatus.textContent = "Message sent successfully!";
+          formStatus.style.color = '#34D399'; // Green color for success
+          form.reset(); // Clear the form
+        } else {
+          throw new Error(result.message || 'An unknown error occurred.');
+        }
+
+      } catch (error) {
+        console.error('Form submission error:', error);
+        formStatus.textContent = 'An error occurred. Please try again.';
+        formStatus.style.color = '#F87171'; // Red color for error
+      } finally {
+        // Re-enable the button after a short delay
+        setTimeout(() => {
+            submitButton.disabled = false;
+            submitButton.innerHTML = 'Send Message';
+        }, 2000);
+      }
+    });
+  </script>
+
+</body>
+</html>

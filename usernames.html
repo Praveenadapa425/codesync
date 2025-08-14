@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CodeSync | Update Usernames</title>
+  <link rel="icon" type="image/png" href="favicon_codesync.png">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/aws-amplify@4.3.27/dist/aws-amplify.min.js"></script>
+  <script src="./js/amplify_config.js"></script>
+</head>
+<body class="bg-gray-900 text-white flex items-center justify-center min-h-screen">
+  <div class="bg-white/10 backdrop-blur-md p-8 rounded-xl w-full max-w-md space-y-6 text-center shadow-lg">
+    <h1 class="text-3xl font-bold text-purple-400">⚙️ Update Your Usernames</h1>
+    <p class="text-sm text-gray-400 -mt-4">Your changes will be saved to your profile.</p>
+
+    <div class="space-y-4">
+      <div class="flex items-center bg-gray-800 p-2 rounded-lg">
+        <img src="https://leetcode.com/static/images/LeetCode_logo_rvs.png" alt="LeetCode Logo" class="w-6 h-6 mr-3">
+        <input id="leetcode" placeholder="LeetCode Username" class="w-full p-2 bg-transparent text-white placeholder-gray-500 focus:outline-none" />
+      </div>
+      <div class="flex items-center bg-gray-800 p-2 rounded-lg">
+        <img src="https://cdn.codechef.com/images/cc-logo.svg" alt="CodeChef Logo" class="w-6 h-6 mr-3">
+        <input id="codechef" placeholder="CodeChef Username" class="w-full p-2 bg-transparent text-white placeholder-gray-500 focus:outline-none" />
+      </div>
+      <div class="flex items-center bg-gray-800 p-2 rounded-lg">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/4/40/HackerRank_Icon-1000px.png" alt="HackerRank Logo" class="w-6 h-6 mr-3">
+        <input id="hackerrank" placeholder="HackerRank Username" class="w-full p-2 bg-transparent text-white placeholder-gray-500 focus:outline-none" />
+      </div>
+      <div class="flex items-center bg-gray-800 p-2 rounded-lg">
+        <img src="https://media.geeksforgeeks.org/gfg-gg-logo.svg" alt="GFG Logo" class="w-6 h-6 mr-3">
+        <input id="gfg" placeholder="GFG Username" class="w-full p-2 bg-transparent text-white placeholder-gray-500 focus:outline-none" />
+      </div>
+    </div>
+
+    <div id="status-message" class="hidden text-sm text-center"></div>
+
+    <button onclick="updateUsernames()" class="bg-purple-600 hover:bg-purple-700 w-full py-3 rounded-lg font-semibold text-white transition-colors">
+      💾 Save Changes
+    </button>
+    
+    <div class="flex justify-between items-center mt-6">
+      <a href="results.html" class="text-sm text-gray-300 hover:underline">← Back to Results</a>
+      <button onclick="logout()" class="text-sm text-gray-300 hover:underline">🚪 Logout</button>
+    </div>
+  </div>
+
+  <script>
+    const platformIds = ["leetcode", "codechef", "hackerrank", "gfg"];
+
+    window.addEventListener("load", () => {
+      if (!window.aws_amplify) {
+        console.error("Amplify script failed to load.");
+        return;
+      }
+
+      const { Auth } = window.aws_amplify;
+      Auth.configure(window.amplifyConfig);
+
+      Auth.currentAuthenticatedUser()
+        .then(user => Auth.userAttributes(user))
+        .then(attributes => {
+          const attributeMap = {};
+          attributes.forEach(attr => {
+            attributeMap[attr.Name] = attr.Value;
+          });
+
+          platformIds.forEach(id => {
+            document.getElementById(id).value = attributeMap[`custom:${id}_username`] || '';
+          });
+        })
+        .catch(err => {
+          console.error("User not authenticated, redirecting...", err);
+          window.location.href = "index.html";
+        });
+    });
+
+    async function updateUsernames() {
+      const statusMessage = document.getElementById('status-message');
+      statusMessage.className = 'hidden';
+
+      try {
+        const { Auth } = window.aws_amplify;
+        const user = await Auth.currentAuthenticatedUser();
+
+        const attributesToUpdate = {
+          'custom:leetcode_username': document.getElementById('leetcode').value.trim(),
+          'custom:codechef_username': document.getElementById('codechef').value.trim(),
+          'custom:hackerrank_username': document.getElementById('hackerrank').value.trim(),
+          'custom:gfg_username': document.getElementById('gfg').value.trim()
+        };
+
+        await Auth.updateUserAttributes(user, attributesToUpdate);
+
+        statusMessage.textContent = "Usernames updated successfully! Redirecting...";
+        statusMessage.className = 'text-sm text-green-400';
+        
+        setTimeout(() => {
+          window.location.href = 'results.html';
+        }, 1500);
+
+      } catch (err) {
+        console.error("Error updating attributes:", err);
+        statusMessage.textContent = `Update failed: ${err.message}`;
+        statusMessage.className = 'text-sm text-red-400';
+      }
+    }
+
+    async function logout() {
+      try {
+        const { Auth } = window.aws_amplify;
+        await Auth.signOut();
+        localStorage.clear();
+        window.location.href = "index.html";
+      } catch (err) {
+        console.error("Logout failed:", err);
+      }
+    }
+  </script>
+</body>
+</html>
