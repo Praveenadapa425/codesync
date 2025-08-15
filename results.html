@@ -226,7 +226,7 @@
         try {
             const idToken = await currentUser.getIdToken(true); // Get the auth token
             
-            const response = await fetch('/api/refresh-stats', {
+            const response = await fetch('https://codesync-backend-three.vercel.app/api/refresh-stats', {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${idToken}`
