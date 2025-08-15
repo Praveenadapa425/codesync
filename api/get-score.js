@@ -1,22 +1,27 @@
+// /api/get-score.js
 
-// Import the necessary libraries
+// Import the necessary libraries from your package.json
 import axios from 'axios';
 import cheerio from 'cheerio';
 
-// This is the main function Vercel will execute when /api/get-score is accessed.
+/**
+ * This is the main Vercel Serverless Function.
+ * It acts as a router, taking a `platform` and `username` from the URL,
+ * calling the correct scraping function, and returning the data to the frontend.
+ */
 export default async function handler(request, response) {
-  // Get 'platform' and 'username' from the URL query parameters
+  // Extract 'platform' and 'username' from the URL query.
+  // Example: /api/get-score?platform=leetcode&username=testuser
   const { platform, username } = request.query;
 
-  // Basic validation
+  // Validate that the required parameters were provided.
   if (!platform || !username) {
-    return response.status(400).json({ error: 'Platform and username are required parameters.' });
+    return response.status(400).json({ error: 'Platform and username are required query parameters.' });
   }
 
   try {
     let data;
-    // Use a switch statement to route to the correct scraping function
-    // based on the 'platform' query parameter.
+    // This switch statement calls the appropriate function based on the platform.
     switch (platform.toLowerCase()) {
       case 'leetcode':
         data = await getLeetCodeStats(username);
@@ -31,45 +36,50 @@ export default async function handler(request, response) {
         data = await getGfgStats(username);
         break;
       default:
+        // If the platform is not one of the above, return an error.
         return response.status(400).json({ error: 'Unsupported platform provided.' });
     }
     
-    // Set a caching header. This tells Vercel to cache the result for 1 hour (3600 seconds).
-    // This prevents re-scraping on every page refresh, making your app faster and more respectful to the platforms.
+    // IMPORTANT: Set a caching header. This tells Vercel to cache the result for 1 hour (3600 seconds).
+    // This dramatically improves performance and prevents you from scraping the same page on every single visit.
     response.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate');
     
-    // Send the successfully scraped data back to the frontend.
+    // If everything was successful, send the scraped data back to the frontend with a 200 OK status.
     return response.status(200).json(data);
 
   } catch (error) {
+    // If any of the scraping functions fail, this block will catch the error.
     console.error(`Scraping Error for ${platform} user ${username}:`, error.message);
-    return response.status(500).json({ error: `Failed to fetch stats for ${platform}. User may not exist or the platform's structure has changed.` });
+    // Return a 500 Internal Server Error, indicating a problem on our end.
+    return response.status(500).json({ error: `Failed to fetch stats for ${platform}. The user might not exist or the site's layout may have changed.` });
   }
 }
 
 // --- Platform-Specific Scraping Functions ---
 
 /**
- * Translates your leetcode.py
  * Fetches LeetCode stats using their official GraphQL API.
+ * This is the most reliable method.
  */
 async function getLeetCodeStats(username) {
   const { data } = await axios.post('https://leetcode.com/graphql', {
-    query: `
-      query getUserProfile($username: String!) {
+    query: `query getUserProfile($username: String!) {
         matchedUser(username: $username) {
           submitStats: submitStatsGlobal {
             acSubmissionNum { difficulty count }
           }
         }
-      }
-    `,
+      }`,
     variables: { username }
   });
 
-  if (data.errors) throw new Error(data.errors[0].message);
+  if (data.errors) {
+    throw new Error(data.errors[0].message);
+  }
+  
   const stats = data.data.matchedUser.submitStats.acSubmissionNum;
   
+  // This returns the data in a nested object, as expected by results.html
   return {
     leetcode: {
       problems_solved: stats.find(s => s.difficulty === 'All')?.count || 0,
@@ -81,18 +91,17 @@ async function getLeetCodeStats(username) {
 }
 
 /**
- * Translates your codechef.py
  * Scrapes the public CodeChef user profile page.
  */
 async function getCodeChefStats(username) {
-  const url = `https://www.codechef.com/users/${username}`;
-  const { data } = await axios.get(url);
+  const { data } = await axios.get(`https://www.codechef.com/users/${username}`);
   const $ = cheerio.load(data);
   
   const rating = $('.rating-number').text().trim() || '0';
   const stars = $('span.rating').text().trim() || 'Unrated';
-  const problems_solved_text = $('h3:contains("Total Problems Solved")').text();
-  const problems_solved = problems_solved_text.match(/\d+/) ? problems_solved_text.match(/\d+/)[0] : '0';
+  const problemsSolvedText = $('h3:contains("Total Problems Solved")').text();
+  const problemsSolvedMatch = problemsSolvedText.match(/\d+/);
+  const problems_solved = problemsSolvedMatch ? problemsSolvedMatch[0] : '0';
   const contests_participated = $('.contest-participated-count b').text() || '0';
 
   return {
@@ -106,17 +115,13 @@ async function getCodeChefStats(username) {
 }
 
 /**
- * Translates your hacerRank.py
- * Scrapes the public HackerRank user profile page.
+ * Scrapes the public HackerRank user profile page for the badge count.
  */
 async function getHackerRankStats(username) {
-    const url = `https://www.hackerrank.com/profile/${username}`;
-    const { data } = await axios.get(url);
+    const { data } = await axios.get(`https://www.hackerrank.com/profile/${username}`);
     const $ = cheerio.load(data);
-
-    // The badge count is the most reliable metric we can scrape easily.
     const badgeCount = $('div.hacker-badge').length;
-
+    
     return {
         hackerrank: {
             badges: badgeCount || 0
@@ -124,29 +129,22 @@ async function getHackerRankStats(username) {
     };
 }
 
-
 /**
- * Translates your gfg.py
- * This function is different from your Python code because running a full browser (Selenium)
- * is not practical or free on Vercel's serverless functions.
- * Instead, we use a more efficient method of finding the data embedded in the page's HTML.
+ * Scrapes the GeeksforGeeks profile by parsing a script tag, which is more
+ * reliable than looking for specific HTML elements that might change.
  */
 async function getGfgStats(username) {
-  const url = `https://auth.geeksforgeeks.org/user/${username}`;
-  const { data } = await axios.get(url);
+  const { data } = await axios.get(`https://auth.geeksforgeeks.org/user/${username}`);
   const $ = cheerio.load(data);
   
-  // Scrape basic info directly from elements
-  const scoreText = $('.score_card_name:contains("Overall Problem Solved")').next('.score_card_value').text();
-  const totalProblemsSolved = parseInt(scoreText, 10) || 0;
+  const totalProblemsSolved = parseInt($('.score_card_name:contains("Overall Problem Solved")').next('.score_card_value').text(), 10) || 0;
   
-  // The difficulty breakdown is inside a <script> tag. We need to extract it.
-  const scriptContent = $('script').filter((i, el) => {
-    return $(el).html().includes('profile_user_stats');
-  }).html();
+  // Find the script tag containing the user's detailed stats
+  const scriptContent = $('script').filter((i, el) => $(el).html().includes('profile_user_stats')).html();
 
   let easy = 0, medium = 0, hard = 0;
-  // Use a regular expression to find the JSON data within the script
+  
+  // Use a Regular Expression to extract the JSON object from the script text
   const match = scriptContent ? scriptContent.match(/let user_profile_data = (.*?);/) : null;
   
   if (match && match[1]) {
@@ -157,11 +155,12 @@ async function getGfgStats(username) {
       medium = submissionStats.medium || 0;
       hard = submissionStats.hard || 0;
     } catch (e) {
-      console.error("Could not parse GFG JSON data", e);
+      console.error("Could not parse GFG JSON data from script tag", e);
     }
   }
 
-  // GFG data is not nested in the response format your frontend expects
+  // IMPORTANT: This returns a FLAT object, which is exactly what your
+  // results.html file expects for the GeeksforGeeks card.
   return {
       username: username,
       totalProblemsSolved: totalProblemsSolved,
