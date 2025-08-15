@@ -271,6 +271,7 @@
                     break;
                 case 'hackerrank':
                     card.getElementById('hackerrank-badges').textContent = data.badges || '0';
+                    card.getElementById('hackerrank-totalStars').textContent = data.totalStars || '0'
                     break;
                 case 'gfg':
                     card.getElementById('gfg-username').textContent = `@${data.username || username}`;
