@@ -117,186 +117,188 @@
     </div>
     
     <!-- START OF NEW FIREBASE SCRIPT -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
-        import { firebaseConfig } from './js/firebase_config.js';
+    <!-- START OF REPLACEMENT SCRIPT FOR results.html -->
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+    import { firebaseConfig } from './js/firebase_config.js';
 
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-        // --- Global variables and DOM element references ---
-        let currentUserData = {};
-        const sidebar = document.getElementById('sidebar'); 
-        const sidebarCloseButton = document.getElementById('sidebar-close-button'); 
-        const mobileOpenSidebarButton = document.getElementById('mobile-open-sidebar-button'); 
-        const sidebarBackdrop = document.getElementById('sidebar-backdrop');
-        const refreshButton = document.getElementById('refresh-stats-btn');
-        const outputDiv = document.getElementById('output');
-        const initialLoadingSkeleton = document.getElementById('initial-loading-skeleton');
+    // --- DOM element references ---
+    const sidebar = document.getElementById('sidebar'); 
+    const sidebarCloseButton = document.getElementById('sidebar-close-button'); 
+    const mobileOpenSidebarButton = document.getElementById('mobile-open-sidebar-button'); 
+    const sidebarBackdrop = document.getElementById('sidebar-backdrop');
+    const refreshButton = document.getElementById('refresh-stats-btn');
+    const outputDiv = document.getElementById('output');
+    const initialLoadingSkeleton = document.getElementById('initial-loading-skeleton');
+    const lastUpdatedTimestamp = document.getElementById('last-updated-timestamp');
 
-        // --- Main execution starts here ---
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                // User is signed in, fetch data and setup the page
-                initialLoadingSkeleton.style.display = 'block';
-                const userDocRef = doc(db, "users", user.uid);
-                try {
-                    const docSnap = await getDoc(userDocRef);
-                    if (docSnap.exists()) {
-                        currentUserData = docSnap.data();
-                        setupPage();
-                    } else {
-                        throw new Error("User profile not found in database.");
-                    }
-                } catch (err) {
-                    console.error("Failed to fetch user data:", err);
-                    outputDiv.innerHTML = `<div class="col-span-full text-center p-8 bg-red-900/30 rounded-lg"><h3 class="text-xl text-red-300">Error</h3><p class="text-red-400">${err.message}</p></div>`;
+    let currentUser = null;
+    let currentUserData = {};
+
+    // --- Main execution starts here ---
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            currentUser = user; // Store the user object
+            initialLoadingSkeleton.style.display = 'block';
+            const userDocRef = doc(db, "users", user.uid);
+            try {
+                const docSnap = await getDoc(userDocRef);
+                if (docSnap.exists()) {
+                    currentUserData = docSnap.data();
+                    setupPage();
+                } else {
+                    throw new Error("User profile not found in database.");
                 }
-            } else {
-                // No user is signed in, redirect to login page.
-                console.log("User not authenticated. Redirecting to login...");
-                window.location.href = "index.html";
+            } catch (err) {
+                handlePageError(err);
             }
-        });
+        } else {
+            window.location.href = "index.html";
+        }
+    });
 
-        // --- Setup Functions ---
-        function setupPage() {
-            updateUIWithUserInfo(currentUserData);
-            setupEventListeners();
-            fetchScores(currentUserData);
+    function setupPage() {
+        updateUIWithUserInfo(currentUserData);
+        setupEventListeners();
+        displayStoredStats(currentUserData); // Display stats from DB first
+    }
+
+    function setupEventListeners() {
+        mobileOpenSidebarButton.addEventListener('click', () => { sidebar.classList.add('active'); sidebarBackdrop.classList.add('active'); });
+        sidebarCloseButton.addEventListener('click', () => { sidebar.classList.remove('active'); sidebarBackdrop.classList.remove('active'); });
+        sidebarBackdrop.addEventListener('click', () => { sidebar.classList.remove('active'); sidebarBackdrop.classList.remove('active'); });
+        refreshButton.addEventListener('click', handleRefreshClick);
+    }
+    
+    function updateUIWithUserInfo(data) {
+        // (This function remains unchanged)
+        const userName = data.name || 'Coder';
+        document.getElementById('user-name').textContent = userName;
+        document.getElementById('user-email').textContent = data.email || 'N/A';
+        document.getElementById('user-profile-avatar').src = `https://ui-avatars.com/api/?background=6d28d9&color=fff&name=${encodeURIComponent(userName)}`; 
+        document.getElementById('welcome-header').textContent = `Welcome, ${userName}!`;
+        document.getElementById('leetcode-profile').querySelector('span > span').textContent = data.leetcode_username || 'Not linked';
+        document.getElementById('codechef-profile').querySelector('span > span').textContent = data.codechef_username || 'Not linked';
+        document.getElementById('hackerrank-profile').querySelector('span > span').textContent = data.hackerrank_username || 'Not linked';
+        document.getElementById('gfg-profile').querySelector('span > span').textContent = data.gfg_username || 'Not linked';
+    }
+
+    function displayStoredStats(userData) {
+        initialLoadingSkeleton.style.display = 'none';
+        outputDiv.innerHTML = '';
+
+        if (userData.statsLastUpdatedAt) {
+            const date = userData.statsLastUpdatedAt.toDate();
+            lastUpdatedTimestamp.textContent = `Last updated: ${date.toLocaleString()}`;
+        } else {
+            lastUpdatedTimestamp.textContent = 'Stats never refreshed. Click Refresh!';
         }
 
-        function setupEventListeners() {
-            mobileOpenSidebarButton.addEventListener('click', () => { sidebar.classList.add('active'); sidebarBackdrop.classList.add('active'); });
-            sidebarCloseButton.addEventListener('click', () => { sidebar.classList.remove('active'); sidebarBackdrop.classList.remove('active'); });
-            sidebarBackdrop.addEventListener('click', () => { sidebar.classList.remove('active'); sidebarBackdrop.classList.remove('active'); });
-            refreshButton.addEventListener('click', () => fetchScores(currentUserData));
+        const stats = userData.stats;
+        if (!stats || Object.keys(stats).length === 0) {
+            outputDiv.innerHTML = `<div class="col-span-full text-center bg-gray-800/50 p-8 rounded-xl"><h3 class="text-xl font-semibold text-gray-50">No Stats Found</h3><p class="text-gray-400">Click the 'Refresh Stats' button to fetch your coding profiles!</p></div>`;
+            return;
         }
-        
-        function updateUIWithUserInfo(data) {
-            const userName = data.name || 'Coder';
-            const userEmail = data.email || 'N/A';
-            document.getElementById('user-name').textContent = userName;
-            document.getElementById('user-email').textContent = userEmail;
-            document.getElementById('user-profile-avatar').src = `https://ui-avatars.com/api/?background=6d28d9&color=fff&name=${encodeURIComponent(userName)}`; 
-            document.getElementById('welcome-header').textContent = `Welcome, ${userName}!`;
+
+        // Render cards for each platform that has stored stats
+        if (stats.leetcode && userData.leetcode_username) renderCard('leetcode', userData.leetcode_username, stats.leetcode);
+        if (stats.codechef && userData.codechef_username) renderCard('codechef', userData.codechef_username, stats.codechef);
+        if (stats.hackerrank && userData.hackerrank_username) renderCard('hackerrank', userData.hackerrank_username, stats.hackerrank);
+        if (stats.gfg && userData.gfg_username) renderCard('gfg', userData.gfg_username, stats.gfg);
+    }
+
+    async function handleRefreshClick() {
+        if (!currentUser) return alert('You must be logged in to refresh stats.');
+
+        refreshButton.disabled = true;
+        refreshButton.innerHTML = '<div class="spinner"></div> Refreshing...';
+        lastUpdatedTimestamp.textContent = 'Fetching live data... please wait.';
+
+        try {
+            const idToken = await currentUser.getIdToken(true); // Get the auth token
             
-            // Update sidebar profile links
-            const leetcodeSpan = document.getElementById('leetcode-profile').querySelector('span > span');
-            leetcodeSpan.textContent = data.leetcode_username || 'Not linked';
-            const codechefSpan = document.getElementById('codechef-profile').querySelector('span > span');
-            codechefSpan.textContent = data.codechef_username || 'Not linked';
-            const hackerrankSpan = document.getElementById('hackerrank-profile').querySelector('span > span');
-            hackerrankSpan.textContent = data.hackerrank_username || 'Not linked';
-            const gfgSpan = document.getElementById('gfg-profile').querySelector('span > span');
-            gfgSpan.textContent = data.gfg_username || 'Not linked';
-        }
-        
-        async function fetchScores(userData) {
-            initialLoadingSkeleton.style.display = 'none';
-            outputDiv.innerHTML = ''; 
-            refreshButton.disabled = true;
-            refreshButton.innerHTML = '<div class="spinner"></div> Refreshing...'; 
+            const response = await fetch('/api/refresh-stats', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${idToken}`
+                }
+            });
 
-            const platforms = [
-                { name: 'leetcode', username: userData.leetcode_username },
-                { name: 'codechef', username: userData.codechef_username },
-                { name: 'hackerrank', username: userData.hackerrank_username },
-                { name: 'gfg', username: userData.gfg_username }
-            ];
-            
-            const platformsToFetch = platforms.filter(p => p.username);
-
-            if (platformsToFetch.length === 0) {
-                 outputDiv.innerHTML = `<div class="col-span-full text-center bg-gray-800/50 p-8 rounded-xl"><i class="bi bi-exclamation-triangle-fill text-yellow-500 text-4xl mb-3"></i><h3 class="text-xl font-semibold text-gray-50">No usernames found</h3><p class="text-gray-400">Please <a href="./usernames.html" class="text-purple-400 underline">add your platform usernames</a> to see stats.</p></div>`;
-            } else {
-                const fetchPromises = platformsToFetch.map(p => {
-                    // CONSTRUCT THE NEW API URL for Vercel Serverless Functions
-                    const apiUrl = `/api/get-score?platform=${p.name}&username=${p.username}`;
-                    return fetch(apiUrl).then(res => {
-                        if (!res.ok) throw new Error(`Failed to fetch ${p.name}`);
-                        return res.json().then(data => ({ ...p, data })); // Return combined info
-                    });
-                });
-                
-                const results = await Promise.allSettled(fetchPromises);
-                
-                results.forEach(result => {
-                    if (result.status === 'fulfilled') {
-                        renderCard(result.value.name, result.value.username, result.value.data);
-                    } else {
-                        // This part needs to know which platform failed. We'll need to parse the error.
-                        console.error(`Fetch failed:`, result.reason);
-                        // For now, we show a generic error card. A more robust solution would parse the reason.
-                        appendErrorCard('A Platform'); 
-                    }
-                });
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Failed to refresh stats.');
             }
 
-            document.getElementById('last-updated-timestamp').textContent = `Last updated: ${new Date().toLocaleTimeString()}`;
+            // Success! The backend has updated the database.
+            // The simplest way to show the new data is to just reload the page.
+            window.location.reload();
+
+        } catch (err) {
+            console.error('Error refreshing stats:', err);
+            lastUpdatedTimestamp.textContent = `Error: ${err.message}`;
             refreshButton.disabled = false;
             refreshButton.innerHTML = '<i class="bi bi-arrow-clockwise text-lg"></i> Refresh Stats';
         }
+    }
 
-        function renderCard(platformName, username, data) {
-            try {
-                const card = document.getElementById(`${platformName}-template`).content.cloneNode(true);
-                card.getElementById(`${platformName}-username`).textContent = `@${username}`;
-                const platformData = data[platformName]; // The data is nested under the platform name key
-                if (!platformData) throw new Error(`Data for ${platformName} is missing in API response.`);
-
-                switch(platformName) {
-                    case 'leetcode':
-                        card.getElementById('leetcode-problems').textContent = platformData.problems_solved || '0';
-                        card.getElementById('leetcode-easy').textContent = platformData.Easy || '0';
-                        card.getElementById('leetcode-medium').textContent = platformData.Medium || '0';
-                        card.getElementById('leetcode-hard').textContent = platformData.Hard || '0';
-                        break;
-                    case 'codechef':
-                        card.getElementById('codechef-problems').textContent = platformData.problems_solved || '0';
-                        card.getElementById('codechef-rating').textContent = platformData.contest_rating || '0';
-                        card.getElementById('codechef-contests').textContent = platformData.contests_participated || '0';
-                        card.getElementById('codechef-stars').textContent = platformData.stars || '0 ★';
-                        break;
-                    case 'hackerrank':
-                        card.getElementById('hackerrank-badges').textContent = platformData.badges || '0';
-                        break;
-                    case 'gfg':
-                         // GFG data is not nested in the provided old code, so we adapt
-                        card.getElementById('gfg-username').textContent = `@${data.username || username}`;
-                        card.getElementById('gfg-problems').textContent = data.totalProblemsSolved || '0';
-                        card.getElementById('gfg-easy').textContent = data.easyProblems || '0';
-                        card.getElementById('gfg-medium').textContent = data.mediumProblems || '0';
-                        card.getElementById('gfg-hard').textContent = data.hardProblems || '0';
-                        break;
-                }
-                outputDiv.appendChild(card);
-            } catch (e) {
-                console.error(`Error rendering card for ${platformName}:`, e, data);
-                appendErrorCard(platformName);
+    function renderCard(platformName, username, data) {
+        // This function now receives the direct stats object, not the nested one
+        try {
+            const card = document.getElementById(`${platformName}-template`).content.cloneNode(true);
+            card.getElementById(`${platformName}-username`).textContent = `@${username}`;
+            
+            switch(platformName) {
+                case 'leetcode':
+                    card.getElementById('leetcode-problems').textContent = data.problems_solved || '0';
+                    card.getElementById('leetcode-easy').textContent = data.Easy || '0';
+                    card.getElementById('leetcode-medium').textContent = data.Medium || '0';
+                    card.getElementById('leetcode-hard').textContent = data.Hard || '0';
+                    break;
+                case 'codechef':
+                    card.getElementById('codechef-problems').textContent = data.problems_solved || '0';
+                    card.getElementById('codechef-rating').textContent = data.contest_rating || '0';
+                    card.getElementById('codechef-contests').textContent = data.contests_participated || '0';
+                    card.getElementById('codechef-stars').textContent = data.stars || '0 ★';
+                    break;
+                case 'hackerrank':
+                    card.getElementById('hackerrank-badges').textContent = data.badges || '0';
+                    break;
+                case 'gfg':
+                    card.getElementById('gfg-username').textContent = `@${data.username || username}`;
+                    card.getElementById('gfg-problems').textContent = data.totalProblemsSolved || '0';
+                    card.getElementById('gfg-easy').textContent = data.easyProblems || '0';
+                    card.getElementById('gfg-medium').textContent = data.mediumProblems || '0';
+                    card.getElementById('gfg-hard').textContent = data.hardProblems || '0';
+                    break;
             }
+            outputDiv.appendChild(card);
+        } catch (e) {
+            console.error(`Error rendering card for ${platformName}:`, e, data);
         }
+    }
 
-        function appendErrorCard(platformName) {
-            const errorCard = document.getElementById('error-card-template').content.cloneNode(true);
-            errorCard.querySelector('.platform-name').textContent = platformName.charAt(0).toUpperCase() + platformName.slice(1);
-            outputDiv.appendChild(errorCard);
-        }
+    function handlePageError(err) {
+        initialLoadingSkeleton.style.display = 'none';
+        outputDiv.innerHTML = `<div class="col-span-full text-center p-8 bg-red-900/30 rounded-lg"><h3 class="text-xl text-red-300">An Error Occurred</h3><p class="text-red-400">${err.message}</p></div>`;
+    }
 
-        // --- Global Logout Function ---
-        window.logout = async function() {
-            try {
-                await signOut(auth);
-                // onAuthStateChanged will handle the redirect
-            } catch (err) {
-                console.error("Logout failed:", err);
-            }
+    // Global logout function
+    window.logout = async function() {
+        try {
+            await signOut(auth);
+        } catch (err) {
+            console.error("Logout failed:", err);
         }
-    </script>
+    }
+</script>
+
     <!-- END OF NEW FIREBASE SCRIPT -->
 </body>
 </html>```
