@@ -194,7 +194,7 @@
     <script type="module">
         // Import Firebase functions and your configuration
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
+        import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, sendEmailVerification, signOut } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
         import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
         import { firebaseConfig } from './js/firebase_config.js';
 
@@ -295,15 +295,26 @@
             const password = document.getElementById("login-password").value.trim();
             
             try {
-                await signInWithEmailAndPassword(auth, email, password);
-                // onAuthStateChanged will handle the redirect automatically.
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+                
+                if (user && !user.emailVerified) {
+                    showMessage(loginErrorMsg, "Your email has not been verified. Please check your inbox for a verification link.");
+                    await signOut(auth);
+                    loginBtn.disabled = false;
+                    loginBtn.textContent = 'Sign in';
+                    return;
+                }
+
+        // If the code reaches this point, the user's email is verified.
+        // The onAuthStateChanged listener will handle the redirect.
             } catch (err) {
                 showMessage(loginErrorMsg, err.message);
-            } finally {
                 loginBtn.disabled = false;
                 loginBtn.textContent = 'Sign in';
             }
         });
+
 
         // Signup Step 1 to Step 2
         signupNextBtn.addEventListener("click", () => {
@@ -349,8 +360,13 @@
                 // Save profile to Firestore
                 await setDoc(doc(db, "users", user.uid), userProfileData);
                 
-                alert("Account created successfully! Please log in to continue.");
-                window.location.reload(); // Reload to show the login form
+                //  Send the verification email to the new user.
+                await sendEmailVerification(user);
+                
+                //  Inform the user to check their email with a better message.
+                alert("Account created! A verification link has been sent to your email. Please verify before logging in.");
+                window.location.reload(); 
+                
 
             } catch (err) {
                 showMessage(platformErrorMsg, err.message);
