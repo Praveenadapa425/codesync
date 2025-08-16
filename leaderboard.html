@@ -1,89 +1,160 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>CodeSync Leaderboard</title>
-   <link rel="icon" type="image/png" href="favicon_codesync.png">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script src="https://cdn.tailwindcss.com"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodeSync Leaderboard</title>
+    <link rel="icon" type="image/png" href="favicon_codesync.png">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts - Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        /* Custom styles for messages to match index.html error/success colors */
+        .text-red-500 {
+            color: #EF4444; /* Tailwind's red-500 */
+        }
+        .text-yellow-400 {
+            color: #FACC15; /* Tailwind's yellow-400 */
+        }
+    </style>
 </head>
-<body class="bg-gray-900 text-white font-sans min-h-screen flex flex-col items-center p-6">
-  <div class="flex flex-col md:flex-row justify-between items-center w-full max-w-4xl mb-8">
-    <h1 class="text-4xl font-bold text-center md:text-left">🏆 CodeSync Leaderboard</h1>
-    <!-- UPDATED: Points to the main login page -->
-    <a href="./index.html" class="mt-4 md:mt-0 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition">
-      Go to Home Page
-    </a>
-  </div>
+<body class="font-sans leading-normal tracking-normal min-h-screen flex flex-col">
 
-  <div class="w-full max-w-4xl overflow-x-auto shadow-xl rounded-lg border border-gray-700">
-    <table class="w-full text-sm text-left">
-      <thead class="bg-gray-800 text-white uppercase text-xs">
-        <tr>
-          <th class="px-4 py-3">Rank</th>
-          <th class="px-4 py-3">Name</th>
-          <th class="px-4 py-3">LeetCode</th>
-          <th class="px-4 py-3">CodeChef</th>
-          <th class="px-4 py-3">GeeksforGeeks</th>
-          <th class="px-4 py-3 font-bold">Total</th>
-        </tr>
-      </thead>
-      <tbody id="leaderboard-body" class="bg-gray-700 divide-y divide-gray-600">
-        <!-- Initial loading state -->
-        <tr>
-          <td colspan="6" class="text-center py-4">Loading Leaderboard...</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+    <!-- Consistent Header -->
+    <header class="bg-gray-900 text-white py-4 px-6 shadow-lg sticky top-0 z-50">
+        <div class="container mx-auto flex justify-between items-center max-w-7xl">
+            <div class="text-2xl font-bold">
+                <a href="./index.html" class="flex items-center space-x-3">
+                    <img src="favicon_codesync.png" alt="CodeSync Logo" class="h-10 w-auto filter brightness-150">
+                    <h1 class="md:text-2xl text-xl font-extrabold text-white">CodeSync</h1>
+                </a>
+            </div>
+            <nav class="hidden md:flex space-x-6 text-lg">
+                <a href="./index.html#home" class="hover:text-blue-400 transition duration-300 font-medium">Home</a>
+                <a href="./Features.html" class="hover:text-blue-400 transition duration-300 font-medium">Features</a>
+                <a href="./leaderboard.html" class="text-blue-400 font-semibold">Leaderboard</a>
+                <a href="./contact.html" class="hover:text-blue-400 transition duration-300 font-medium">Contact</a>
+            </nav>
+            <div class="md:hidden">
+                <button id="mobile-menu-button" class="text-white focus:outline-none p-2 rounded-md hover:bg-gray-700">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <div id="mobile-menu" class="hidden md:hidden bg-gray-800 py-3 mt-2 rounded-b-lg shadow-inner">
+            <a href="./index.html#home" class="block px-6 py-3 text-white hover:bg-gray-700 transition duration-200 text-lg">Home</a>
+            <a href="./Features.html" class="block px-6 py-3 text-white hover:bg-gray-700 transition duration-200 text-lg">Features</a>
+            <a href="./leaderboard.html" class="block px-6 py-3 text-white hover:bg-gray-700 transition duration-200 text-lg">Leaderboard</a>
+            <a href="./contact.html" class="block px-6 py-3 text-white hover:bg-gray-700 transition duration-200 text-lg">Contact</a>
+        </div>
+    </header>
 
-  <script type="module">
-    import { API_BASE_URL } from './js/api_config.js';
+    <!-- Main Content with Gradient Background -->
+    <main class="flex-grow bg-gradient-to-br from-blue-600 to-indigo-800 py-16 sm:py-24">
+        <div class="container mx-auto px-6 max-w-7xl">
+            <div class="flex flex-col md:flex-row justify-between items-center w-full mb-8">
+                <h1 class="text-4xl sm:text-5xl font-extrabold text-white text-center md:text-left">🏆 CodeSync Leaderboard</h1>
+                <a href="./index.html" class="mt-4 md:mt-0 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300 ease-in-out shadow-lg transform hover:scale-105">
+                    Go to Home Page
+                </a>
+            </div>
 
-    async function fetchLeaderboard() {
-      const tbody = document.getElementById('leaderboard-body');
-      try {
-        const response = await fetch(`${API_BASE_URL}/api/update-leaderboard`);
-        
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+            <div class="w-full overflow-x-auto shadow-2xl rounded-lg border border-gray-100 bg-white p-4">
+                <table class="w-full text-sm text-left text-gray-800">
+                    <thead class="bg-gray-100 text-gray-700 uppercase text-xs">
+                        <tr>
+                            <th class="px-4 py-3">Rank</th>
+                            <th class="px-4 py-3">Name</th>
+                            <th class="px-4 py-3">LeetCode</th>
+                            <th class="px-4 py-3">CodeChef</th>
+                            <th class="px-4 py-3">GeeksforGeeks</th>
+                            <th class="px-4 py-3 font-bold">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboard-body" class="bg-white divide-y divide-gray-200">
+                        <!-- Initial loading state -->
+                        <tr>
+                            <td colspan="6" class="text-center py-4 text-gray-500">Loading Leaderboard...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-gray-400 py-6 text-center">
+        <p>&copy; 2024 CodeSync. All rights reserved.</p>
+    </footer>
+
+    <script type="module">
+        import { API_BASE_URL } from './js/api_config.js';
+
+        async function fetchLeaderboard() {
+            const tbody = document.getElementById('leaderboard-body');
+            try {
+                // Display loading state
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-gray-500">Loading Leaderboard...</td></tr>';
+
+                const response = await fetch(`${API_BASE_URL}/api/update-leaderboard`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+
+                tbody.innerHTML = ''; // Clear loading state
+
+                if (data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-gray-500">Leaderboard is empty or still generating. Check back soon!</td></tr>';
+                    return;
+                }
+
+                data.forEach((user, index) => {
+                    const rank = index + 1;
+                    let medal = '';
+                    if (rank === 1) medal = '🥇 ';
+                    else if (rank === 2) medal = '🥈 ';
+                    else if (rank === 3) medal = '🥉 ';
+
+                    const row = `
+                        <tr class="hover:bg-gray-50 transition duration-150 ease-in-out">
+                            <td class="px-4 py-3 text-center font-bold text-gray-900">${rank}</td>
+                            <td class="px-4 py-3 text-gray-800">${medal}${user.name}</td>
+                            <td class="px-4 py-3 text-center text-gray-700">${user.leetcode}</td>
+                            <td class="px-4 py-3 text-center text-gray-700">${user.codechef}</td>
+                            <td class="px-4 py-3 text-center text-gray-700">${user.gfg}</td>
+                            <td class="px-4 py-3 text-center font-semibold text-blue-600">${user.total}</td>
+                        </tr>
+                    `;
+                    tbody.innerHTML += row;
+                });
+
+            } catch (err) {
+                console.error("Error loading leaderboard:", err);
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-red-600">Error loading leaderboard. Please try again later.</td></tr>';
+            }
         }
-        const data = await response.json();
 
-        tbody.innerHTML = '';
+        fetchLeaderboard();
 
-        if (data.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4">Leaderboard is empty or still generating. Check back soon!</td></tr>';
-          return;
-        }
-
-        data.forEach((user, index) => {
-          const rank = index + 1;
-          let medal = '';
-          if (rank === 1) medal = '🥇 ';
-          else if (rank === 2) medal = '🥈 ';
-          else if (rank === 3) medal = '🥉 ';
-
-          const row = `
-            <tr class="hover:bg-gray-600 transition">
-              <td class="px-4 py-3 text-center font-bold">${rank}</td>
-              <td class="px-4 py-3">${medal}${user.name}</td>
-              <td class="px-4 py-3 text-center">${user.leetcode}</td>
-              <td class="px-4 py-3 text-center">${user.codechef}</td>
-              <td class="px-4 py-3 text-center">${user.gfg}</td>
-              <td class="px-4 py-3 text-center font-semibold text-yellow-400">${user.total}</td>
-            </tr>
-          `;
-          tbody.innerHTML += row;
+        // Mobile menu toggle script (copied from index.html)
+        document.getElementById('mobile-menu-button').addEventListener('click', function() {
+            document.getElementById('mobile-menu').classList.toggle('hidden');
         });
-
-      } catch (err) {
-        console.error("Error loading leaderboard:", err);
-        tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-red-500">Error loading leaderboard. Please try again later.</td></tr>';
-      }
-    }
-
-    fetchLeaderboard();
-  </script>
+        document.querySelectorAll('#mobile-menu a').forEach(item => {
+            item.addEventListener('click', () => document.getElementById('mobile-menu').classList.add('hidden'));
+        });
+    </script>
 </body>
 </html>
