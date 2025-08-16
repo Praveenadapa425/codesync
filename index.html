@@ -3,8 +3,8 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-   <title>CodeSync</title>
-   <link rel="icon" type="image/png" href="favicon_codesync.png">
+    <title>CodeSync</title>
+    <link rel="icon" type="image/png" href="favicon_codesync.png">
     
     <meta name="description" content="A powerful platform for students and college management to synchronize and manage student coding profiles across competitive programming and GitHub platforms.">
     <meta name="keywords" content="Student Coding Sync, College Dashboard, Competitive Programming Sync, GitHub Profiles, LeetCode, Codeforces, Coding Platform Integration, Student Progress Synchronization">
@@ -99,7 +99,6 @@
                             <button id="signup-tab" class="px-6 py-2 text-lg font-semibold rounded-t-lg border-b-2 transition-colors duration-300">Sign Up</button>
                         </div>
 
-                        <!-- Login Form -->
                         <form id="login-form" class="space-y-6">
                             <div>
                                 <label for="login-email" class="sr-only">Email address</label>
@@ -121,7 +120,6 @@
                             </div>
                         </form>
                         
-                        <!-- Signup Form Step 1 -->
                         <form id="signup-form" class="space-y-6 hidden">
                              <div>
                                 <label for="signup-full-name" class="sr-only">Full Name</label>
@@ -148,9 +146,8 @@
                             </div>
                         </form>
 
-                        <!-- Signup Form Step 2 -->
                         <form id="platform-form" class="space-y-6 hidden">
-                            <h3 class="text-center text-gray-800 font-semibold text-xl">Link Your Coding Profiles</h3>              
+                            <h3 class="text-center text-gray-800 font-semibold text-xl">Link Your Coding Profiles</h3>           
                             <p class="text-center text-gray-500 text-sm -mt-4">Optional, you can add these later.</p>
                             <div><input id="signup-leetcode" name="leetcode_username" type="text" class="block w-full px-4 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-lg" placeholder="LeetCode Username"></div>
                             <div><input id="signup-codechef" name="codechef_username" type="text" class="block w-full px-4 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-lg" placeholder="CodeChef Username"></div>
@@ -161,7 +158,6 @@
                             <div class="text-center text-sm"><button type="button" id="back-to-signup-btn" class="text-blue-600 hover:text-blue-500 hover:underline">Back</button></div>
                         </form>
                         
-                        <!-- Forgot Password Form -->
                         <form id="forgot-password-form" class="space-y-6 hidden">
                             <p class="text-center text-gray-600">Enter your email and we'll send a password reset link.</p>
                             <div>
@@ -188,7 +184,6 @@
         </main>
     </div>
 
-    <!-- START OF CORRECTED AND FINAL FIREBASE SCRIPT -->
     <script type="module">
         // Import Firebase functions and your configuration
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
@@ -290,7 +285,11 @@
                     return;
                 }
             } catch (err) {
-                showMessage(loginErrorMsg, err.message);
+                if (err.code === 'auth/invalid-credential') {
+                    showMessage(loginErrorMsg, "Invalid email or password. Please try again.");
+                } else {
+                    showMessage(loginErrorMsg, "Invalid email or password. Please try again.");
+                }
             } finally {
                  loginBtn.disabled = false;
                  loginBtn.textContent = 'Sign in';
@@ -339,8 +338,14 @@
                 await sendEmailVerification(user);
                 await signOut(auth);
                 
-                alert("Account created! A verification link has been sent to your email. Please verify before logging in.");
-                window.location.reload(); 
+                // Show success message on the current form
+                showMessage(platformErrorMsg, "Account created! A verification link has been sent to your email. Please verify before logging in.", false);
+                
+                // Switch back to login form after a delay
+                setTimeout(() => {
+                    showForm(loginForm);
+                    updateTabStyles('login-tab');
+                }, 3000); 
                 
             } catch (err) {
                 showMessage(platformErrorMsg, err.message);
@@ -377,10 +382,10 @@
                 number: /[0-9]/.test(password),
                 special: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/.test(password),
             };
-            reqLength.classList.toggle('met', checks.length);
-            reqCase.classList.toggle('met', checks.case);
-            reqNumber.classList.toggle('met', checks.number);
-            reqSpecial.classList.toggle('met', checks.special);
+            reqLength.className = 'password-requirement ' + (checks.length ? 'met' : 'unmet');
+            reqCase.className = 'password-requirement ' + (checks.case ? 'met' : 'unmet');
+            reqNumber.className = 'password-requirement ' + (checks.number ? 'met' : 'unmet');
+            reqSpecial.className = 'password-requirement ' + (checks.special ? 'met' : 'unmet');
             signupNextBtn.disabled = !Object.values(checks).every(Boolean);
         };
         signupPasswordInput.addEventListener('input', validatePassword);
@@ -403,6 +408,5 @@
         });
 
     </script>
-    <!-- END OF CORRECTED AND FINAL FIREBASE SCRIPT -->
-</body>
+    </body>
 </html>
