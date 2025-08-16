@@ -3,257 +3,138 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CodeSync - Feature List</title>
-     <link rel="icon" type="image/png" href="favicon_codesync.png">
+    <title>CodeSync - Features</title>
+    <link rel="icon" type="image/png" href="favicon_codesync.png">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Inter Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            line-height: 1.6;
-            background-color: #111827; /* Dark background */
-            color: #d1d5db; /* Light gray text */
-            margin: 0;
-            padding: 20px;
+            font-family: 'Inter', sans-serif;
+            /* Background color handled by main section gradient */
+            -webkit-font-smoothing: antialiased; /* Consistent with index.html */
+            -moz-osx-font-smoothing: grayscale; /* Consistent with index.html */
         }
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-            background-color: #1f2937; /* Slightly lighter dark shade for container */
-            padding: 25px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        .feature-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
         }
-        h1, h2 {
-            color: #ffffff;
-            border-bottom: 2px solid #374151;
-            padding-bottom: 10px;
-            margin-top: 0;
-        }
-        h1 {
-            text-align: center;
-            font-size: 2.5em;
-        }
-        h2 {
-            font-size: 1.8em;
-            margin-top: 30px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        th, td {
-            padding: 12px 15px;
-            text-align: left;
-            border-bottom: 1px solid #374151; /* Darker border for table rows */
-        }
-        thead th {
-            background-color: #374151; /* Header background */
-            color: #ffffff;
-            font-size: 1.1em;
-        }
-        tbody tr:nth-child(even) {
-            background-color: #2c3a4b; /* Subtle striping for rows */
-        }
-        tbody tr:hover {
-            background-color: #4b5563;
-        }
-        td:first-child {
-            font-weight: bold;
-            color: #9ca3af; /* Lighter color for feature names */
-            width: 40%;
-        }
-        .emoji {
-            font-size: 1.2em;
-            margin-right: 8px;
-        }
-        .planned {
-            font-style: italic;
-            color: #6b7280;
+        .feature-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
         }
     </style>
 </head>
-<body>
+<body class="bg-gray-50 text-gray-800 min-h-screen flex flex-col">
+    <!-- Body background set to gray-50 as a base, main content will have gradient -->
 
-    <div class="container">
-        <h1><span class="emoji">🚀</span> CodeSync – Complete Feature List</h1>
+    <!-- Consistent Header (Copied from index.html) -->
+    <header class="bg-gray-900 text-white py-4 px-6 shadow-lg sticky top-0 z-50">
+        <div class="container mx-auto flex justify-between items-center max-w-7xl">
+            <div class="text-2xl font-bold">
+                <a href="./index.html" class="flex items-center space-x-3">
+                    <img src="favicon_codesync.png" alt="CodeSync Logo" class="h-10 w-auto filter brightness-150">
+                    <h1 class="md:text-2xl text-xl font-extrabold text-white">CodeSync</h1>
+                </a>
+            </div>
+            <nav class="hidden md:flex space-x-6 text-lg">
+                <a href="./index.html#home" class="hover:text-blue-400 transition duration-300 font-medium">Home</a>
+                <a href="./Features.html" class="text-blue-400 font-semibold">Features</a>
+                <a href="./leaderboard.html" class="hover:text-blue-400 transition duration-300 font-medium">Leaderboard</a>
+                <a href="./contact.html" class="hover:text-blue-400 transition duration-300 font-medium">Contact</a>
+            </nav>
+            <div class="md:hidden">
+                <button id="mobile-menu-button" class="text-white focus:outline-none p-2 rounded-md hover:bg-gray-700">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <div id="mobile-menu" class="hidden md:hidden bg-gray-800 py-3 mt-2 rounded-b-lg shadow-inner">
+            <a href="./index.html#home" class="block px-6 py-3 text-white hover:bg-gray-700 transition duration-200 text-lg">Home</a>
+            <a href="./Features.html" class="block px-6 py-3 text-white hover:bg-gray-700 transition duration-200 text-lg">Features</a>
+            <a href="./leaderboard.html" class="block px-6 py-3 text-white hover:bg-gray-700 transition duration-200 text-lg">Leaderboard</a>
+            <a href="./contact.html" class="block px-6 py-3 text-white hover:bg-gray-700 transition duration-200 text-lg">Contact</a>
+        </div>
+    </header>
 
-        <h2><span class="emoji">✅</span> Core Functional Features</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Feature</th>
-                    <th>Description</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td><span class="emoji">🔢</span> Coding Score Tracker</td>
-                    <td>Fetches scores from CodeChef, LeetCode, HackerRank, and GFG via Lambda REST API</td>
-                </tr>
-                <tr>
-                    <td><span class="emoji">🧠</span> Smart Profile Management</td>
-                    <td>Users can enter or auto-fetch usernames on sign-in; stored in DynamoDB</td>
-                </tr>
-                <tr>
-                    <td><span class="emoji">🌓</span> Dark Mode UI</td>
-                    <td>Sleek Tailwind CSS frontend with light/dark mode support</td>
-                </tr>
-                <tr>
-                    <td><span class="emoji">📈</span> Live Score Dashboard</td>
-                    <td>Displays platform-wise scores with animations and icons</td>
-                </tr>
-            </tbody>
-        </table>
+    <!-- Main Content with Gradient Background -->
+    <main class="flex-grow bg-gradient-to-br from-blue-600 to-indigo-800">
+        <div class="relative isolate overflow-hidden">
+            
+            <div class="container mx-auto px-6 py-16 sm:py-24 max-w-7xl">
+                <div class="text-center mb-16">
+                    <h1 class="text-4xl sm:text-5xl font-extrabold text-white">Core Features of CodeSync</h1>
+                    <p class="mt-4 text-lg text-blue-100 max-w-3xl mx-auto">From multi-platform tracking to secure authentication, here's everything that makes CodeSync work.</p>
+                </div>
 
-        <h2><span class="emoji">🔐</span> Authentication & User Management</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Feature</th>
-                    <th>Description</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td><span class="emoji">🔐</span> AWS Cognito Login/Signup</td>
-                    <td>Email-password based login/signup with hosted UI</td>
-                </tr>
-                <tr>
-                    <td><span class="emoji">🧾</span> Token Expiry Handling</td>
-                    <td>60-minute access tokens, 5-day refresh tokens using SRP authentication</td>
-                </tr>
-                <tr>
-                    <td><span class="emoji">🧠</span> Remember Usernames</td>
-                    <td>Saves platform usernames after first login and auto-fills next time</td>
-                </tr>
-                <tr>
-                    <td><span class="emoji">🚪</span> Logout Support</td>
-                    <td>Redirects to sign-out URL using Cognito Hosted UI</td>
-                </tr>
-            </tbody>
-        </table>
+                <!-- Feature Grid -->
+                <div class="grid gap-8 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
 
-        <h2><span class="emoji">📤</span> Notifications & Engagement</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Feature</th>
-                    <th>Description</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td><span class="emoji">📩</span> SNS Email Reminders</td>
-                    <td>Sends email reminders for inactive coders via Amazon SNS</td>
-                </tr>
-                <tr>
-                    <td><span class="emoji">⏰</span> Cron Job via EventBridge</td>
-                    <td>Daily 12:30 PM UTC Lambda trigger to check inactivity</td>
-                </tr>
-                <tr>
-                    <td><span class="emoji">🧮</span> NoCodingDetected Table</td>
-                    <td>Tracks users with no activity; cleaned after 22 hours</td>
-                </tr>
-                <tr>
-                    <td><span class="emoji">🧪</span> Verified Email Check</td>
-                    <td>Sends emails only if user has verified SNS subscription</td>
-                </tr>
-            </tbody>
-        </table>
+                    <!-- Feature 1: Multi-Platform Sync -->
+                    <div class="feature-card p-6 rounded-xl border border-gray-100 bg-white shadow-2xl hover:border-blue-500">
+                        <i class="bi bi-hdd-stack-fill text-3xl text-blue-600 mb-4 inline-block"></i>
+                        <h3 class="text-xl font-semibold text-gray-900 mb-2">Multi-Platform Sync</h3>
+                        <p class="text-gray-700">Aggregates and displays your problem-solving stats from LeetCode, CodeChef, HackerRank, and GeeksForGeeks in a unified dashboard.</p>
+                    </div>
 
-        <h2><span class="emoji">📊</span> Analytics & Dashboards</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Feature</th>
-                    <th>Description</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td><span class="emoji">📊</span> Amazon QuickSight Integration</td>
-                    <td><span class="planned">(Planned)</span> Advanced visual dashboards for coding progress</td>
-                </tr>
-                <tr>
-                    <td><span class="emoji">🥇</span> Leaderboard System</td>
-                    <td><span class="planned">(Planned)</span> Compare scores of registered users</td>
-                </tr>
-                <tr>
-                    <td><span class="emoji">🤖</span> AI-Based Coding Planner</td>
-                    <td><span class="planned">(Planned)</span> Recommends targets based on previous performance</td>
-                </tr>
-            </tbody>
-        </table>
+                    <!-- Feature 2: Secure User Authentication -->
+                    <div class="feature-card p-6 rounded-xl border border-gray-100 bg-white shadow-2xl hover:border-blue-500">
+                        <i class="bi bi-shield-lock-fill text-3xl text-blue-600 mb-4 inline-block"></i>
+                        <h3 class="text-xl font-semibold text-gray-900 mb-2">Secure User Authentication</h3>
+                        <p class="text-gray-700">Reliable and secure user registration and login powered by Firebase Authentication, complete with email verification.</p>
+                    </div>
 
-        <h2><span class="emoji">☁️</span> Tech Stack / Cloud Setup</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Stack Component</th>
-                    <th>Usage</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td><span class="emoji">🐍</span> AWS Lambda (Python)</td>
-                    <td>Backend logic to fetch scores and send reminders</td>
-                </tr>
-                <tr>
-                    <td><span class="emoji">🌐</span> API Gateway</td>
-                    <td>REST APIs for frontend-backend communication</td>
-                </tr>
-                <tr>
-                    <td><span class="emoji">🗃️</span> DynamoDB</td>
-                    <td>Stores user profiles and reminder status</td>
-                </tr>
-                <tr>
-                    <td><span class="emoji">🎨</span> Tailwind CSS</td>
-                    <td>Responsive and clean UI design</td>
-                </tr>
-                <tr>
-                    <td><span class="emoji">🔐</span> Cognito User Pool</td>
-                    <td>Auth system (Hosted UI, SRP)</td>
-                </tr>
-                <tr>
-                    <td><span class="emoji">🗂️</span> S3 Bucket</td>
-                    <td>Hosting frontend assets (HTML, JS, CSS)</td>
-                </tr>
-                 <tr>
-                    <td><span class="emoji">⚙️</span> GitHub Actions + CodePipeline</td>
-                    <td><span class="planned">(Planned)</span> CI/CD for automatic deployment</td>
-                </tr>
-            </tbody>
-        </table>
+                    <!-- Feature 3: Personalized Profiles -->
+                    <div class="feature-card p-6 rounded-xl border border-gray-100 bg-white shadow-2xl hover:border-blue-500">
+                        <i class="bi bi-person-circle text-3xl text-blue-600 mb-4 inline-block"></i>
+                        <h3 class="text-xl font-semibold text-gray-900 mb-2">Personalized Profiles</h3>
+                        <p class="text-gray-700">Users can securely save and update their coding platform usernames, with all data stored in a scalable Firestore database.</p>
+                    </div>
 
-        <h2><span class="emoji">🛠️</span> Developer & Utility Features</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Feature</th>
-                    <th>Description</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td><span class="emoji">🔧</span> Lambda IAM Role (LambdaRekognitionExecutionRole)</td>
-                    <td>Gives access to Lambda, S3, SNS, CloudWatch</td>
-                </tr>
-                <tr>
-                    <td><span class="emoji">🔁</span> Dual Mode Username Input</td>
-                    <td>Auto-fetch usernames or manually enter</td>
-                </tr>
-                <tr>
-                    <td><span class="emoji">🖼️</span> Favicon + GitHub Pages Hosting</td>
-                    <td>Branded deployment with favicon and GitHub Pages link</td>
-                </tr>
-                <tr>
-                    <td><span class="emoji">📦</span> Modular Code Structure</td>
-                    <td>Python backend with modular scraping files for each platform</td>
-                </tr>
-            </tbody>
-        </table>
+                    <!-- Feature 4: On-Demand Stat Refresh -->
+                    <div class="feature-card p-6 rounded-xl border border-gray-100 bg-white shadow-2xl hover:border-blue-500">
+                        <i class="bi bi-arrow-clockwise text-3xl text-blue-600 mb-4 inline-block"></i>
+                        <h3 class="text-xl font-semibold text-gray-900 mb-2">On-Demand Stat Refresh</h3>
+                        <p class="text-gray-700">Instantly fetch your latest achievements with the click of a button, powered by Vercel Serverless Functions.</p>
+                    </div>
 
-    </div>
+                    <!-- Feature 5: Modern Tech Stack -->
+                    <div class="feature-card p-6 rounded-xl border border-gray-100 bg-white shadow-2xl hover:border-blue-500">
+                        <i class="bi bi-braces text-3xl text-blue-600 mb-4 inline-block"></i>
+                        <h3 class="text-xl font-semibold text-gray-900 mb-2">Modern Tech Stack</h3>
+                        <p class="text-gray-700">Built with a fast, responsive frontend (Tailwind CSS) and a robust, scalable serverless backend (Vercel & Firebase).</p>
+                    </div>
+                    
+                    <!-- Feature 6: Fully Responsive Design -->
+                    <div class="feature-card p-6 rounded-xl border border-gray-100 bg-white shadow-2xl hover:border-blue-500">
+                        <i class="bi bi-phone-fill text-3xl text-blue-600 mb-4 inline-block"></i>
+                        <h3 class="text-xl font-semibold text-gray-900 mb-2">Fully Responsive Design</h3>
+                        <p class="text-gray-700">Access your coding dashboard from any device, with a user interface that adapts seamlessly to any screen size.</p>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-gray-400 py-6 text-center">
+        <p>&copy; 2024 CodeSync. All rights reserved.</p>
+    </footer>
+
+    <!-- Mobile menu toggle script -->
+    <script>
+        document.getElementById('mobile-menu-button').addEventListener('click', function() {
+            document.getElementById('mobile-menu').classList.toggle('hidden');
+        });
+        document.querySelectorAll('#mobile-menu a').forEach(item => {
+            item.addEventListener('click', () => document.getElementById('mobile-menu').classList.add('hidden'));
+        });
+    </script>
 
 </body>
 </html>
