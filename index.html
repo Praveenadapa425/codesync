@@ -24,8 +24,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
-
-
     <style>
         @keyframes fadeInSlideUp {
             from {
@@ -112,7 +110,7 @@
                                 <input id="login-password" name="password" type="password" autocomplete="current-password" required class="block w-full px-4 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-lg" placeholder="Password">
                                 <button type="button" onclick="togglePassword('login-password', 'toggleLoginPasswordButton')" class="absolute right-3 top-3 text-gray-600 hover:text-blue-500" aria-label="Toggle password visibility" id="toggleLoginPasswordButton"><i class="bi bi-eye"></i></button>
                             </div>
-                            <div id="login-error-message" class="hidden text-red-600 text-sm text-center -mt-2"></div>
+                            <div id="login-error-message" class="text-red-600 text-sm text-center -mt-2"></div>
                             <div class="flex items-center justify-between">
                                 <div class="text-md">
                                     <button type="button" id="forgot-password-link" class="font-medium text-blue-600 hover:text-blue-500 transition duration-200">Forgot your password?</button>
@@ -144,7 +142,7 @@
                                 <p id="req-number" class="password-requirement unmet">✓ At least one number (0-9)</p>
                                 <p id="req-special" class="password-requirement unmet">✓ At least one special character (!, @, #, ...)</p>
                             </div>
-                            <div id="signup-error-message" class="hidden text-red-600 text-sm text-center -mt-2"></div>
+                            <div id="signup-error-message" class="text-red-600 text-sm text-center -mt-2"></div>
                             <div>
                                 <button type="button" id="signup-next-btn" class="w-full flex justify-center py-3 px-4 border border-transparent text-lg font-semibold rounded-lg text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed" disabled>Next</button>
                             </div>
@@ -158,7 +156,7 @@
                             <div><input id="signup-codechef" name="codechef_username" type="text" class="block w-full px-4 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-lg" placeholder="CodeChef Username"></div>
                             <div><input id="signup-hackerrank" name="hackerrank_username" type="text" class="block w-full px-4 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-lg" placeholder="HackerRank Username"></div>
                             <div><input id="signup-gfg" name="gfg_username" type="text" class="block w-full px-4 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-lg" placeholder="GFG Username"></div>
-                            <div id="platform-error-message" class="hidden text-red-600 text-sm text-center -mt-2"></div>
+                            <div id="platform-error-message" class="text-red-600 text-sm text-center -mt-2"></div>
                             <div><button type="submit" id="signup-btn-submit" class="w-full flex justify-center py-3 px-4 border border-transparent text-lg font-semibold rounded-lg text-white bg-green-600 hover:bg-green-700">Create Account</button></div>
                             <div class="text-center text-sm"><button type="button" id="back-to-signup-btn" class="text-blue-600 hover:text-blue-500 hover:underline">Back</button></div>
                         </form>
@@ -190,7 +188,7 @@
         </main>
     </div>
 
-    <!-- START OF NEW FIREBASE SCRIPT -->
+    <!-- START OF UPDATED FIREBASE SCRIPT -->
     <script type="module">
         // Import Firebase functions and your configuration
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
@@ -267,10 +265,10 @@
 
         // --- Main Logic ---
         
-        // Auto-redirect if user is already logged in
+        // Auto-redirect if user is logged in AND their email is verified
         onAuthStateChanged(auth, (user) => {
-            if (user) {
-                console.log("User is already signed in. Redirecting to results page.");
+            if (user && user.emailVerified) {
+                console.log("User is signed in and verified. Redirecting to results page.");
                 window.location.href = 'results.html';
             }
         });
@@ -298,23 +296,29 @@
                 const userCredential = await signInWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
                 
+                // *** FIX 2: Check for email verification AFTER successful login attempt ***
                 if (user && !user.emailVerified) {
-                    showMessage(loginErrorMsg, "Your email has not been verified. Please check your inbox for a verification link.");
+                    // Sign the user out again because their email is not verified
                     await signOut(auth);
+                    showMessage(loginErrorMsg, "Your email has not been verified. Please check your inbox for a verification link.");
                     loginBtn.disabled = false;
                     loginBtn.textContent = 'Sign in';
                     return;
                 }
+                // If the code reaches this point, the user's email is verified.
+                // The onAuthStateChanged listener above will handle the redirect.
 
-        // If the code reaches this point, the user's email is verified.
-        // The onAuthStateChanged listener will handle the redirect.
             } catch (err) {
-                showMessage(loginErrorMsg, err.message);
-                loginBtn.disabled = false;
-                loginBtn.textContent = 'Sign in';
+                if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
+                    showMessage(loginErrorMsg, "Invalid email or password.");
+                } else {
+                    showMessage(loginErrorMsg, err.message);
+                }
+            } finally {
+                 loginBtn.disabled = false;
+                 loginBtn.textContent = 'Sign in';
             }
         });
-
 
         // Signup Step 1 to Step 2
         signupNextBtn.addEventListener("click", () => {
@@ -357,17 +361,15 @@
                     gfg_username: document.getElementById("signup-gfg").value.trim()
                 };
                 
-                // Save profile to Firestore
                 await setDoc(doc(db, "users", user.uid), userProfileData);
-                
-                //  Send the verification email to the new user.
                 await sendEmailVerification(user);
                 
-                //  Inform the user to check their email with a better message.
+                // *** FIX 1: Sign the user out immediately after registration ***
+                await signOut(auth);
+                
                 alert("Account created! A verification link has been sent to your email. Please verify before logging in.");
                 window.location.reload(); 
                 
-
             } catch (err) {
                 showMessage(platformErrorMsg, err.message);
             } finally {
@@ -435,6 +437,6 @@
         });
 
     </script>
-    <!-- END OF NEW FIREBASE SCRIPT -->
+    <!-- END OF UPDATED FIREBASE SCRIPT -->
 </body>
 </html>
