@@ -1,126 +1,252 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Contact Us - CodeSync</title>
-  <link rel="icon" type="image/png" href="favicon_codesync.png">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>CodeSync | Contact Us</title>
+    <link rel="icon" type="image/png" href="favicon_codesync.png">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts - Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
+    <style>
+        @keyframes fadeInSlideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .animate-fade-in-slide-up {
+            animation: fadeInSlideUp 1s ease-out forwards;
+        }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+         .form-input {
+          background-color: white;
+          border: 1px solid #d1d5db;
+          transition: border-color 0.2s, box-shadow 0.2s;
+          color: #1f2937;
+          outline: none;
+        }
+        .form-input:focus {
+            --tw-ring-color: #3b82f6;
+            border-color: #3b82f6;
+        }
+       
 
-  <style>
-    /* Using a dark theme similar to the leaderboard */
-    body {
-      background: linear-gradient(to right, #121212, #1e1e1e);
-      font-family: 'Poppins', sans-serif;
-    }
-
-    /* Glassmorphism Container Style */
-    .glass-container {
-      background: rgba(35, 35, 45, 0.6); /* Darker glass effect */
-      backdrop-filter: blur(10px);
-      border-radius: 15px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-    }
-
-    /* Styling for form inputs to match the theme */
-    .form-input {
-      background: rgba(255, 255, 255, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      color: #fff;
-    }
-
-    .form-input::placeholder {
-      color: #ccc;
-    }
-  </style>
+        .text-green-600 { 
+            color: #16A34A;
+        }
+        .text-red-600 { 
+            color: #DC2626;
+        }
+        .text-yellow-400 { 
+            color: #FACC15;
+        }
+    </style>
 </head>
-<body class="bg-gray-900 text-white min-h-screen flex flex-col items-center justify-center p-6">
+<body class="font-sans leading-normal tracking-normal">
+    <!-- Removed bg-gray-50 from body as the gradient will cover it -->
 
-  <div class="w-full max-w-2xl text-center">
-    <div class="glass-container p-8 md:p-12">
-      <div class="flex flex-col md:flex-row justify-between items-center mb-6">
-          <h1 class="text-3xl font-bold text-cyan-400">Contact Us - CodeSync</h1>
-          <a href="leaderboard.html" class="mt-4 md:mt-0 bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded transition text-sm">
-            ← Back to Leaderboard
-          </a>
-      </div>
-
-      <form id="contact-form" action="https://api.web3forms.com/submit" method="POST">
-        <!-- DO NOT CHANGE THIS - IT'S REQUIRED FOR THE FORM TO WORK -->
-        <input type="hidden" name="access_key" value="7f003844-62a9-4710-8794-2dba98e0029e">
-
-        <!-- Form Fields -->
-        <div class="mb-4">
-          <input type="text" id="name" name="name" placeholder="Your Name" class="w-full p-3 rounded-lg form-input transition focus:outline-none focus:ring-2 focus:ring-cyan-400" required>
+    <!-- Consistent Header -->
+    <header class="bg-gray-900 text-white py-4 px-6 shadow-lg sticky top-0 z-50">
+        <div class="container mx-auto flex justify-between items-center max-w-7xl">
+            <div class="text-2xl font-bold">
+                <a href="/" class="flex items-center space-x-3">
+                    <img src="favicon_codesync.png" alt="CodeSync Logo" class="h-10 w-auto filter brightness-150">
+                    <h1 class="md:text-2xl text-xl font-extrabold text-white">CodeSync</h1>
+                </a>
+            </div>
+            <nav class="hidden md:flex space-x-6 text-lg">
+                <a href="./index.html#home" class="hover:text-blue-400 transition duration-300 font-medium">Home</a>
+                <a href="./Features.html" class="hover:text-blue-400 transition duration-300 font-medium">Features</a>
+                <a href="./leaderboard.html" class="hover:text-blue-400 transition duration-300 font-medium">Leaderboard</a>
+                <a href="./contact.html" class="text-blue-400 font-semibold">Contact</a>
+            </nav>
         </div>
+    </header>
 
-        <div class="mb-4">
-          <input type="email" id="email" name="email" placeholder="Your Email" class="w-full p-3 rounded-lg form-input transition focus:outline-none focus:ring-2 focus:ring-cyan-400" required>
+    <!-- Main Content with Gradient Background -->
+    <main class="flex-grow bg-gradient-to-br from-blue-600 to-indigo-800">
+        <div class="max-w-7xl mx-auto px-6 py-16 sm:py-24 animate-fade-in-slide-up">
+            <div class="text-center mb-16">
+                <h1 class="text-4xl sm:text-5xl font-extrabold text-white">Get in Touch</h1> <!-- Changed to text-white for readability -->
+                <p class="mt-4 text-lg text-blue-100 max-w-2xl mx-auto">Have a question, feedback, or an inquiry? We'd love to hear from you. Fill out the form or use one of the contact methods below.</p> <!-- Changed to text-blue-100 for readability -->
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-16 items-start">
+                
+                <!-- Left Column: Contact Information -->
+                <div class="space-y-8">
+                    <div>
+                        <h2 class="text-2xl font-bold text-white mb-4">Contact Information</h2> <!-- Changed to text-white -->
+                        <p class="text-blue-100">Reach out directly via email or connect with us on our social platforms.</p> <!-- Changed to text-blue-100 -->
+                    </div>
+                    
+                    <div class="flex items-start gap-4">
+                        <div class="bg-white/20 text-white p-3 rounded-full"> <!-- Adjusted for better contrast on gradient -->
+                            <i class="bi bi-envelope-fill text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-white text-lg">Email Us</h3> <!-- Changed to text-white -->
+                            <p class="text-blue-100">For support and general inquiries.</p> <!-- Changed to text-blue-100 -->
+                            <a href="mailto:contact@codesync.info" class="text-blue-200 hover:text-blue-50 transition-colors mt-1 inline-block">contact@codesync.info</a> <!-- Adjusted for better contrast -->
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start gap-4">
+                        <div class="bg-white/20 text-white p-3 rounded-full"> <!-- Adjusted for better contrast on gradient -->
+                            <i class="bi bi-github text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-white text-lg">GitHub</h3> <!-- Changed to text-white -->
+                            <p class="text-blue-100">Check out the source code and contribute.</p> <!-- Changed to text-blue-100 -->
+                            <a href="https://github.com/Praveenadapa425/codesync" target="_blank" class="text-blue-200 hover:text-blue-50 transition-colors mt-1 inline-block">github.com/Praveenadapa425</a> <!-- Adjusted for better contrast -->
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-4">
+                        <div class="bg-white/20 text-white p-3 rounded-full"> <!-- Adjusted for better contrast on gradient -->
+                            <i class="bi bi-linkedin text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-white text-lg">LinkedIn</h3> <!-- Changed to text-white -->
+                            <p class="text-blue-100">Connect with us professionally.</p> <!-- Changed to text-blue-100 -->
+                            <a href="https://www.linkedin.com/in/praveen-adapa-162179290/" target="_blank" class="text-blue-200 hover:text-blue-50 transition-colors mt-1 inline-block">linkedin.com/in/praveen-adapa</a> <!-- Adjusted for better contrast -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Contact Form -->
+                <div class="bg-white p-8 rounded-xl shadow-2xl border border-gray-100 animate-fade-in-slide-up">
+                    <form id="contact-form" method="POST">
+                        
+                        <!-- IMPORTANT: Replace with your actual Access Key from web3forms.com -->
+                        <input type="hidden" name="access_key" value="YOUR_ACCESS_KEY_HERE">
+
+                        <div class="space-y-6">
+                            <div>
+                                <label for="name" class="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+                                <input type="text" name="name" id="name" required class="form-input block w-full rounded-md shadow-sm py-3 px-4">
+                            </div>
+                            <div>
+                                <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+                                <input type="email" name="email" id="email" required class="form-input block w-full rounded-md shadow-sm py-3 px-4">
+                            </div>
+                            <div>
+                                <label for="subject" class="block text-sm font-medium text-gray-700 mb-2">Subject</label>
+                                <input type="text" name="subject" id="subject" required class="form-input block w-full rounded-md shadow-sm py-3 px-4">
+                            </div>
+                            <div>
+                                <label for="message" class="block text-sm font-medium text-gray-700 mb-2">Message</label>
+                                <textarea name="message" id="message" rows="4" required class="form-input block w-full rounded-md shadow-sm py-3 px-4"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="mt-8">
+                            <button id="submit-btn" type="submit" class="w-full flex justify-center items-center gap-2 py-3 px-4 border border-transparent rounded-lg shadow-sm text-lg font-semibold text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
+                                <i class="bi bi-send-fill"></i>
+                                <span>Send Message</span>
+                            </button>
+                        </div>
+                        
+                        <div id="form-result" class="mt-4 text-center text-sm"></div>
+                    </form>
+                </div>
+            </div>
         </div>
+    </main>
 
-        <div class="mb-6">
-          <textarea id="description" name="description" placeholder="Your message or feedback..." rows="5" class="w-full p-3 rounded-lg form-input transition focus:outline-none focus:ring-2 focus:ring-cyan-400" required></textarea>
-        </div>
+    <script>
+        const form = document.getElementById('contact-form');
+        const submitBtn = document.getElementById('submit-btn');
+        const submitBtnSpan = submitBtn.querySelector('span');
+        const resultDiv = document.getElementById('form-result');
 
-        <!-- Submit Button -->
-        <button type="submit" id="submit-button" class="w-full bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-3 px-4 rounded-lg transition">
-          Send Message
-        </button>
-      </form>
-      <!-- Form Submission Status -->
-      <p id="form-status" class="mt-4 text-center text-sm"></p>
-    </div>
-  </div>
+        /**
+         * Displays a message in a specified element.
+         * @param {HTMLElement} element - The DOM element to display the message in.
+         * @param {string} message - The message text.
+         * @param {boolean} isError - True if it's an error message (red), false for success (green).
+         */
+        const showMessage = (element, message, isError = true) => {
+            element.textContent = message;
+            element.classList.remove('hidden');
+            element.className = `text-sm text-center -mt-2 ${isError ? 'text-red-600' : 'text-green-600'}`;
+        };
 
-  <footer class="text-center py-6 mt-8 text-gray-500 text-sm">
-    <p>© 2024 CodeSync. All rights reserved.</p>
-  </footer>
+        /**
+         * Hides all specific message elements.
+         */
+        const hideAllMessages = () => {
+            resultDiv.textContent = '';
+        };
 
-  <script>
-    const form = document.getElementById('contact-form');
-    const submitButton = document.getElementById('submit-button');
-    const formStatus = document.getElementById('form-status');
+        // Event listener for form submission
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Show a "sending" state
+            submitBtn.disabled = true;
+            submitBtnSpan.textContent = 'Sending...';
+            hideAllMessages(); // Clear any previous messages
+            resultDiv.textContent = 'Sending...'; 
+            resultDiv.className = 'mt-4 text-center text-sm text-yellow-400';
 
-    form.addEventListener('submit', async function(e) {
-      e.preventDefault();
-      const formData = new FormData(form);
-      
-      // Update UI to show submission is in progress
-      submitButton.disabled = true;
-      submitButton.innerHTML = 'Sending...';
-      formStatus.textContent = '';
+            const formData = new FormData(form);
+            const object = Object.fromEntries(formData);
+            const json = JSON.stringify(object);
 
-      try {
-        const response = await fetch('https://api.web3forms.com/submit', {
-          method: 'POST',
-          body: formData
+            try {
+                const response = await fetch('https://api.web3forms.com/submit', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: json
+                });
+
+                const jsonResponse = await response.json();
+
+                if (jsonResponse.success) {
+                    resultDiv.textContent = 'Message sent successfully!';
+                    resultDiv.className = 'mt-4 text-center text-sm text-green-600';
+                    form.reset();
+                    submitBtnSpan.textContent = 'Sent!';
+                } else {
+                    console.error('Submission error:', jsonResponse);
+                    resultDiv.textContent = jsonResponse.message || 'An error occurred. Please try again later.';
+                    resultDiv.className = 'mt-4 text-center text-sm text-red-600';
+                    submitBtnSpan.textContent = 'Failed';
+                }
+            } catch (error) {
+                console.error('Fetch error:', error);
+                resultDiv.textContent = 'A network error occurred. Please check your connection and try again.';
+                resultDiv.className = 'mt-4 text-center text-sm text-red-600';
+                submitBtnSpan.textContent = 'Failed';
+            } finally {
+                // Re-enable the button and reset text after a short delay
+                setTimeout(() => {
+                    submitBtn.disabled = false;
+                    submitBtnSpan.textContent = 'Send Message';
+                    resultDiv.textContent = ''; 
+                }, 4000);
+            }
         });
 
-        const result = await response.json();
-
-        if (result.success) {
-          formStatus.textContent = "Message sent successfully!";
-          formStatus.style.color = '#34D399'; // Green color for success
-          form.reset(); // Clear the form
-        } else {
-          throw new Error(result.message || 'An unknown error occurred.');
-        }
-
-      } catch (error) {
-        console.error('Form submission error:', error);
-        formStatus.textContent = 'An error occurred. Please try again.';
-        formStatus.style.color = '#F87171'; // Red color for error
-      } finally {
-        // Re-enable the button after a short delay
-        setTimeout(() => {
-            submitButton.disabled = false;
-            submitButton.innerHTML = 'Send Message';
-        }, 2000);
-      }
-    });
-  </script>
+    </script>
 
 </body>
 </html>
