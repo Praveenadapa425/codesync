@@ -43,7 +43,7 @@
     async function fetchLeaderboard() {
       const tbody = document.getElementById('leaderboard-body');
       try {
-        const response = await fetch(`${API_BASE_URL}/api/leaderboard`);
+        const response = await fetch(`${API_BASE_URL}/api/update-leaderboard`);
         
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
