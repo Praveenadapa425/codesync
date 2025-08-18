@@ -106,7 +106,7 @@
                 // Display loading state
                 tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-gray-500">Loading Leaderboard...</td></tr>';
 
-                const response = await fetch(`${API_BASE_URL}/api/update-leaderboard`);
+                const response = await fetch(`${API_BASE_URL}/api/leaderboard`);
                 
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
